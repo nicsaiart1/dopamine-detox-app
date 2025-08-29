@@ -12,7 +12,7 @@ import {
   Notification
 } from '@/types';
 import { repository } from '@/data/repository';
-import { format, subDays, startOfWeek, endOfWeek, addWeeks, subWeeks } from 'date-fns';
+import { format } from 'date-fns';
 
 interface AppStore extends AppState {
   // Data
@@ -205,7 +205,7 @@ const useAppStore = create<AppStore>()(
       // Entry management
       addEntry: async (dayId, entryData) => {
         try {
-          const entry = await repository.addEntry({
+          await repository.addEntry({
             ...entryData,
             dayId,
           });
@@ -321,7 +321,7 @@ const useAppStore = create<AppStore>()(
       },
 
       // Computed properties
-      getTimeSeriesData: (days) => {
+      getTimeSeriesData: () => {
         // This would be implemented with actual data fetching
         // For now, return empty array
         return [];

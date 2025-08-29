@@ -1,4 +1,4 @@
-import { ExportData, UserSettings, DayLog, ActivityEntry, WeekSummary } from '@/types';
+import { ExportData, WeekSummary } from '@/types';
 import { repository } from '@/data/repository';
 import { getWeekRange, formatDate, getWeekLabel } from './dates';
 import { format } from 'date-fns';
@@ -101,7 +101,6 @@ export async function exportWeeklyMarkdown(weekId: string): Promise<string> {
   markdown += `|---|---:|---|---|\n`;
   
   for (const day of days) {
-    const dayEntries = entries.filter(e => e.dayId === day.id);
     const topReplacements = Object.entries(day.replacementUsage)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 2)
@@ -152,7 +151,6 @@ export async function importFromJSON(jsonStr: string): Promise<void> {
   }
   
   // Import settings (merge with existing)
-  const currentSettings = await repository.getSettings();
   await repository.saveSettings({
     ...data.settings,
     updatedAt: new Date().toISOString(),

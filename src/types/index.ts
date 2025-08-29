@@ -97,7 +97,7 @@ export interface ActivityFormData {
   replacement?: string;
 }
 
-export interface SettingsFormData extends Partial<Omit<UserSettings, 'id' | 'createdAt' | 'updatedAt'>> {}
+export type SettingsFormData = Partial<Omit<UserSettings, 'id' | 'createdAt' | 'updatedAt'>>;
 
 // Export types
 export interface ExportData {

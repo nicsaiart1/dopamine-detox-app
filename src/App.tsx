@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect } from 'react';
+import useAppStore from '@/store';
+import Layout from '@/components/Layout';
+import DayPage from '@/pages/DayPage';
+import WeekPage from '@/pages/WeekPage';
+import MonthPage from '@/pages/MonthPage';
+import StatsPage from '@/pages/StatsPage';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const { currentView, isInitialized, init } = useAppStore();
+
+  useEffect(() => {
+    if (!isInitialized) {
+      init();
+    }
+  }, [isInitialized, init]);
+
+  const renderCurrentView = () => {
+    switch (currentView) {
+      case 'day':
+        return <DayPage />;
+      case 'week':
+        return <WeekPage />;
+      case 'month':
+        return <MonthPage />;
+      case 'stats':
+        return <StatsPage />;
+      default:
+        return <DayPage />;
+    }
+  };
+
+  if (!isInitialized) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-accent border-t-transparent mx-auto" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            Initializing Dopamine Detox
+          </h2>
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
+            Setting up your tracking environment...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Layout>
+      {renderCurrentView()}
+    </Layout>
+  );
 }
 
-export default App
+export default App;
