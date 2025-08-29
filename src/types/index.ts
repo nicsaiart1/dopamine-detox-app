@@ -5,6 +5,7 @@ export interface UserSettings {
   id: 'singleton';
   createdAt: string; // ISO
   updatedAt: string; // ISO
+  displayName?: string; // User's display name
   weeklyAllowanceMinutes: number; // e.g., 240
   allowanceMode: 'absolute' | 'percentOfLeisure';
   weeklyLeisureMinutes?: number; // used if allowanceMode === 'percentOfLeisure'

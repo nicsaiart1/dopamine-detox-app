@@ -227,19 +227,16 @@ export default function SettingsPage() {
                 Default Categories
               </label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {settings.fastDopamineSettings.categories.map((category, index) => (
+                {(settings.categories || []).map((category, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <input
                       type="text"
                       className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
                       value={category}
                       onChange={(e) => {
-                        const newCategories = [...settings.fastDopamineSettings.categories];
+                        const newCategories = [...(settings.categories || [])];
                         newCategories[index] = e.target.value;
-                        handleSettingsChange('fastDopamineSettings', {
-                          ...settings.fastDopamineSettings,
-                          categories: newCategories
-                        });
+                        handleSettingsChange('categories', newCategories);
                       }}
                     />
                   </div>
@@ -252,19 +249,16 @@ export default function SettingsPage() {
                 Replacement Activities
               </label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {settings.fastDopamineSettings.replacements.map((replacement, index) => (
+                {(settings.replacementCategories || []).map((replacement, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <input
                       type="text"
                       className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
                       value={replacement}
                       onChange={(e) => {
-                        const newReplacements = [...settings.fastDopamineSettings.replacements];
+                        const newReplacements = [...(settings.replacementCategories || [])];
                         newReplacements[index] = e.target.value;
-                        handleSettingsChange('fastDopamineSettings', {
-                          ...settings.fastDopamineSettings,
-                          replacements: newReplacements
-                        });
+                        handleSettingsChange('replacementCategories', newReplacements);
                       }}
                     />
                   </div>

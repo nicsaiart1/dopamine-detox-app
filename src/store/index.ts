@@ -692,10 +692,10 @@ const useAppStore = create<AppStore>()(
       // Computed property for fast dopamine settings
       get fastDopamineSettings() {
         const { settings } = get();
-        return settings?.fastDopamineSettings || {
-          categories: ['Social Media', 'Gaming', 'Video Streaming', 'Shopping'],
-          replacements: ['Reading', 'Exercise', 'Meditation', 'Journaling'],
-          dailyCaps: []
+        return {
+          categories: settings?.categories || ['Social Media', 'Gaming', 'Video Streaming', 'Shopping'],
+          replacements: settings?.replacementCategories || ['Reading', 'Exercise', 'Meditation', 'Journaling'],
+          dailyCaps: [] // This would need to be added to UserSettings if we want to persist caps
         };
       },
     }),

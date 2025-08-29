@@ -65,6 +65,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   id: 'singleton',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
+  displayName: 'Friend',
   weeklyAllowanceMinutes: 240, // 4 hours
   allowanceMode: 'absolute',
   checklistTemplate: DEFAULT_CHECKLIST_TEMPLATE,
