@@ -200,9 +200,9 @@ export default function WeekPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {fastDopamineSettings.dailyCaps.map(cap => {
-              const weekUsage = weeklyProgress.days.map(day => {
-                const dayTotal = day.categoryBreakdown
+            {(fastDopamineSettings?.dailyCaps || []).map(cap => {
+              const weekUsage = (weeklyProgress?.days || []).map(day => {
+                const dayTotal = (day.categoryBreakdown || [])
                   .filter(cat => cap.categories.includes(cat.category))
                   .reduce((sum, cat) => sum + cat.minutes, 0);
                 return {
@@ -265,7 +265,7 @@ export default function WeekPage() {
               <div>
                 <h4 className="font-medium mb-2">Most Used Categories</h4>
                 <div className="space-y-2">
-                  {currentWeek.categoryBreakdown
+                  {(currentWeek?.categoryBreakdown || [])
                     .sort((a, b) => b.minutes - a.minutes)
                     .slice(0, 5)
                     .map(cat => (
@@ -280,7 +280,7 @@ export default function WeekPage() {
               <div>
                 <h4 className="font-medium mb-2">Common Triggers</h4>
                 <div className="space-y-1">
-                  {currentWeek.commonTriggers.slice(0, 5).map((trigger, index) => (
+                  {(currentWeek?.commonTriggers || []).slice(0, 5).map((trigger, index) => (
                     <div key={index} className="text-sm text-gray-600">
                       • {trigger}
                     </div>
@@ -289,7 +289,7 @@ export default function WeekPage() {
               </div>
             </div>
             
-            {currentWeek.reflectionNotes && (
+            {currentWeek?.reflectionNotes && (
               <div className="mt-4 pt-4 border-t">
                 <h4 className="font-medium mb-2">Week Reflection</h4>
                 <p className="text-sm text-gray-700">{currentWeek.reflectionNotes}</p>
