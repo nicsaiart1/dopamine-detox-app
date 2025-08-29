@@ -222,45 +222,108 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>💡 Tip:</strong> These categories and activities will appear as quick-select options 
+                when logging fast-dopamine activities and choosing replacement activities.
+              </p>
+            </div>
+            
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Default Categories
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-gray-700">
+                  Default Categories
+                </label>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const newCategories = [...(settings.categories || []), ''];
+                    handleSettingsChange('categories', newCategories);
+                  }}
+                  className="text-xs"
+                >
+                  Add Category
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {(settings.categories || []).map((category, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <input
                       type="text"
-                      className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                      className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-accent-500"
                       value={category}
+                      placeholder="Enter category name"
                       onChange={(e) => {
                         const newCategories = [...(settings.categories || [])];
                         newCategories[index] = e.target.value;
                         handleSettingsChange('categories', newCategories);
                       }}
                     />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newCategories = (settings.categories || []).filter((_, i) => i !== index);
+                        // Ensure at least one category remains
+                        if (newCategories.length === 0) {
+                          newCategories.push('');
+                        }
+                        handleSettingsChange('categories', newCategories);
+                      }}
+                      className="text-red-500 hover:text-red-700 text-sm px-2 py-1"
+                      disabled={(settings.categories || []).length <= 1}
+                    >
+                      ×
+                    </button>
                   </div>
                 ))}
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Replacement Activities
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-gray-700">
+                  Replacement Activities
+                </label>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const newReplacements = [...(settings.replacementCategories || []), ''];
+                    handleSettingsChange('replacementCategories', newReplacements);
+                  }}
+                  className="text-xs"
+                >
+                  Add Activity
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {(settings.replacementCategories || []).map((replacement, index) => (
                   <div key={index} className="flex items-center gap-2">
                     <input
                       type="text"
-                      className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                      className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-accent-500"
                       value={replacement}
+                      placeholder="Enter activity name"
                       onChange={(e) => {
                         const newReplacements = [...(settings.replacementCategories || [])];
                         newReplacements[index] = e.target.value;
                         handleSettingsChange('replacementCategories', newReplacements);
                       }}
                     />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newReplacements = (settings.replacementCategories || []).filter((_, i) => i !== index);
+                        // Ensure at least one replacement activity remains
+                        if (newReplacements.length === 0) {
+                          newReplacements.push('');
+                        }
+                        handleSettingsChange('replacementCategories', newReplacements);
+                      }}
+                      className="text-red-500 hover:text-red-700 text-sm px-2 py-1"
+                      disabled={(settings.replacementCategories || []).length <= 1}
+                    >
+                      ×
+                    </button>
                   </div>
                 ))}
               </div>
