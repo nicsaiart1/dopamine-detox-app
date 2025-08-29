@@ -53,14 +53,14 @@ export default function MonthPage() {
 
   const getDayData = (date: Date) => {
     const dayId = format(date, 'yyyy-MM-dd');
-    return monthlyData.days.find(d => d.dayId === dayId);
+    return monthlyData?.days?.find(d => d.dayId === dayId);
   };
 
   const getMonthStats = () => {
-    const daysWithData = monthlyData.days.length;
-    const totalMinutes = monthlyData.days.reduce((sum, day) => sum + day.totalMinutes, 0);
+    const daysWithData = monthlyData?.days?.length || 0;
+    const totalMinutes = monthlyData?.days?.reduce((sum, day) => sum + day.totalMinutes, 0) || 0;
     const avgChecklist = daysWithData > 0 
-      ? monthlyData.days.reduce((sum, day) => sum + day.checklistCompletion, 0) / daysWithData
+      ? (monthlyData?.days?.reduce((sum, day) => sum + day.checklistCompletion, 0) || 0) / daysWithData
       : 0;
     const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd }).length;
     const completionRate = (daysWithData / daysInMonth) * 100;
@@ -277,9 +277,9 @@ export default function MonthPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {monthlyData.topCategories.slice(0, 8).map((category, index) => {
-                const percentage = monthlyData.totalMinutes > 0 
-                  ? (category.minutes / monthlyData.totalMinutes) * 100 
+              {(monthlyData?.topCategories || []).slice(0, 8).map((category, index) => {
+                const percentage = (monthlyData?.totalMinutes || 0) > 0 
+                  ? (category.minutes / (monthlyData?.totalMinutes || 1)) * 100 
                   : 0;
                 
                 return (
@@ -310,7 +310,7 @@ export default function MonthPage() {
               <div>
                 <h4 className="font-medium text-sm mb-2">Best Days</h4>
                 <div className="space-y-1">
-                  {monthlyData.days
+                  {(monthlyData?.days || [])
                     .filter(day => day.checklistCompletion >= 80)
                     .sort((a, b) => b.checklistCompletion - a.checklistCompletion)
                     .slice(0, 3)
@@ -326,7 +326,7 @@ export default function MonthPage() {
               <div>
                 <h4 className="font-medium text-sm mb-2">Challenging Days</h4>
                 <div className="space-y-1">
-                  {monthlyData.days
+                  {(monthlyData?.days || [])
                     .filter(day => day.totalMinutes > 60)
                     .sort((a, b) => b.totalMinutes - a.totalMinutes)
                     .slice(0, 3)
@@ -342,7 +342,7 @@ export default function MonthPage() {
               <div>
                 <h4 className="font-medium text-sm mb-2">Common Triggers</h4>
                 <div className="space-y-1">
-                  {monthlyData.commonTriggers.slice(0, 5).map((trigger, index) => (
+                  {(monthlyData?.commonTriggers || []).slice(0, 5).map((trigger, index) => (
                     <div key={index} className="text-sm text-gray-600">
                       • {trigger}
                     </div>

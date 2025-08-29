@@ -80,6 +80,40 @@ export interface ReplacementUsage {
   trend: 'up' | 'down' | 'stable';
 }
 
+export interface MonthlyData {
+  days: Array<{
+    dayId: string;
+    totalMinutes: number;
+    checklistCompletion: number;
+  }>;
+  totalMinutes: number;
+  topCategories: CategoryBreakdown[];
+  commonTriggers: string[];
+}
+
+export interface StatsData {
+  timeSeries: TimeSeriesPoint[];
+  totalDays: number;
+  totalMinutes: number;
+  averageChecklist: number;
+  categoryBreakdown: CategoryBreakdown[];
+  topTriggers: Array<{ trigger: string; count: number }>;
+  replacementUsage: ReplacementUsage[];
+  weeklyPattern: Array<{ dayOfWeek: string; averageMinutes: number }>;
+}
+
+export interface WeeklyProgress {
+  days: Array<{
+    dayId: string;
+    totalMinutes: number;
+    checklistCompletion: number;
+    categoryBreakdown: CategoryBreakdown[];
+  }>;
+  completedDays: number;
+  totalMinutes: number;
+  avgChecklistCompletion: number;
+}
+
 // Navigation and state types
 export interface AppState {
   currentView: ViewType;

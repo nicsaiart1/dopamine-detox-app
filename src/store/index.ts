@@ -9,7 +9,10 @@ import type {
   AppState,
   TimeSeriesPoint,
   CategoryBreakdown,
-  Notification
+  Notification,
+  MonthlyData,
+  StatsData,
+  WeeklyProgress
 } from '../types/index.ts';
 import { repository } from '../data/repository.ts';
 import { format } from 'date-fns';
@@ -19,6 +22,9 @@ interface AppStore extends AppState {
   settings: UserSettings | null;
   currentDay: DayLog | null;
   currentWeek: WeekSummary | null;
+  monthlyData: MonthlyData;
+  statsData: StatsData;
+  weeklyProgress: WeeklyProgress;
   recentEntries: ActivityEntry[];
   notifications: Notification[];
 
@@ -34,6 +40,7 @@ interface AppStore extends AppState {
   // Settings actions
   loadSettings: () => Promise<void>;
   updateSettings: (settings: Partial<UserSettings>) => Promise<void>;
+  saveSettings: (settings: Partial<UserSettings>) => Promise<void>;
   
   // Day actions
   loadDay: (dayId: string) => Promise<void>;
@@ -48,6 +55,13 @@ interface AppStore extends AppState {
   
   // Week actions
   loadWeek: (weekId: string) => Promise<void>;
+  loadWeekData: (weekId: string) => Promise<void>;
+  
+  // Month actions
+  loadMonthData: (monthId: string) => Promise<void>;
+  
+  // Stats actions
+  loadStatsData: (timeRange: string) => Promise<void>;
   
   // Notification actions
   addNotification: (notification: Omit<Notification, 'id'>) => void;
@@ -59,6 +73,7 @@ interface AppStore extends AppState {
   getCurrentStreak: () => number;
   getCapUsageToday: () => number;
   getWeeklyProgress: () => { used: number; cap: number; percentage: number };
+  fastDopamineSettings: any; // Will be derived from settings
 }
 
 const useAppStore = create<AppStore>()(
@@ -72,6 +87,28 @@ const useAppStore = create<AppStore>()(
       settings: null,
       currentDay: null,
       currentWeek: null,
+      monthlyData: {
+        days: [],
+        totalMinutes: 0,
+        topCategories: [],
+        commonTriggers: []
+      },
+      statsData: {
+        timeSeries: [],
+        totalDays: 0,
+        totalMinutes: 0,
+        averageChecklist: 0,
+        categoryBreakdown: [],
+        topTriggers: [],
+        replacementUsage: [],
+        weeklyPattern: []
+      },
+      weeklyProgress: {
+        days: [],
+        completedDays: 0,
+        totalMinutes: 0,
+        avgChecklistCompletion: 0
+      },
       recentEntries: [],
       notifications: [],
       isLoading: false,
@@ -133,6 +170,15 @@ const useAppStore = create<AppStore>()(
             title: 'Update Failed',
             message: 'Could not save settings',
           });
+        }
+      },
+
+      saveSettings: async (settingsUpdate) => {
+        try {
+          await repository.saveSettings(settingsUpdate);
+          await get().loadSettings();
+        } catch (error) {
+          console.error('Failed to save settings:', error);
         }
       },
 
@@ -297,6 +343,280 @@ const useAppStore = create<AppStore>()(
         }
       },
 
+      loadWeekData: async (weekId) => {
+        try {
+          // Parse week ID to get date range
+          const weekStart = new Date(weekId);
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekEnd.getDate() + 6);
+          
+          const startDate = format(weekStart, 'yyyy-MM-dd');
+          const endDate = format(weekEnd, 'yyyy-MM-dd');
+          
+          // Get all days and entries for the week
+          const days = await repository.getDaysInRange(startDate, endDate);
+          const entries = await repository.listEntriesInRange(startDate, endDate);
+          
+          // Build weekly progress data
+          const weekDays = days.map(day => {
+            const dayEntries = entries.filter(entry => entry.dayId === day.id);
+            
+            // Calculate category breakdown for this day
+            const categoryMap = dayEntries.reduce((acc, entry) => {
+              acc[entry.category] = (acc[entry.category] || 0) + entry.minutes;
+              return acc;
+            }, {} as Record<string, number>);
+            
+            const categoryBreakdown = Object.entries(categoryMap)
+              .map(([category, minutes]) => ({
+                category,
+                minutes,
+                percentage: day.totalFastMinutes > 0 ? (minutes / day.totalFastMinutes) * 100 : 0
+              }))
+              .sort((a, b) => b.minutes - a.minutes);
+            
+            return {
+              dayId: day.id,
+              totalMinutes: day.totalFastMinutes,
+              checklistCompletion: day.checklistCompletion,
+              categoryBreakdown
+            };
+          });
+          
+          // Calculate week totals
+          const completedDays = weekDays.filter(day => day.checklistCompletion >= 80).length;
+          const totalMinutes = weekDays.reduce((sum, day) => sum + day.totalMinutes, 0);
+          const avgChecklistCompletion = weekDays.length > 0 
+            ? weekDays.reduce((sum, day) => sum + day.checklistCompletion, 0) / weekDays.length
+            : 0;
+          
+          const weeklyProgress: WeeklyProgress = {
+            days: weekDays,
+            completedDays,
+            totalMinutes,
+            avgChecklistCompletion
+          };
+          
+          set({ weeklyProgress });
+        } catch (error) {
+          console.error('Failed to load week data:', error);
+          // Reset to empty state on error
+          set({ 
+            weeklyProgress: {
+              days: [],
+              completedDays: 0,
+              totalMinutes: 0,
+              avgChecklistCompletion: 0
+            }
+          });
+        }
+      },
+
+      // Month management
+      loadMonthData: async (monthId) => {
+        try {
+          // Parse month ID (YYYY-MM) to get start and end dates
+          const [year, month] = monthId.split('-');
+          const startDate = `${year}-${month}-01`;
+          const lastDay = new Date(parseInt(year), parseInt(month), 0).getDate();
+          const endDate = `${year}-${month}-${lastDay.toString().padStart(2, '0')}`;
+          
+          // Get all days in the month
+          const days = await repository.getDaysInRange(startDate, endDate);
+          const entries = await repository.listEntriesInRange(startDate, endDate);
+          
+          // Calculate monthly stats
+          const totalMinutes = entries.reduce((sum, entry) => sum + entry.minutes, 0);
+          
+          // Group entries by category
+          const categoryMap = entries.reduce((acc, entry) => {
+            acc[entry.category] = (acc[entry.category] || 0) + entry.minutes;
+            return acc;
+          }, {} as Record<string, number>);
+          
+          const topCategories = Object.entries(categoryMap)
+            .map(([category, minutes]) => ({
+              category,
+              minutes,
+              percentage: totalMinutes > 0 ? (minutes / totalMinutes) * 100 : 0
+            }))
+            .sort((a, b) => b.minutes - a.minutes)
+            .slice(0, 10);
+          
+          // Get common triggers
+          const allTriggers = entries.flatMap(entry => entry.triggers);
+          const triggerCounts = allTriggers.reduce((acc, trigger) => {
+            acc[trigger] = (acc[trigger] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>);
+          
+          const commonTriggers = Object.entries(triggerCounts)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 10)
+            .map(([trigger]) => trigger);
+          
+          // Format days data for calendar
+          const monthDays = days.map(day => ({
+            dayId: day.id,
+            totalMinutes: day.totalFastMinutes,
+            checklistCompletion: day.checklistCompletion
+          }));
+          
+          const monthlyData: MonthlyData = {
+            days: monthDays,
+            totalMinutes,
+            topCategories,
+            commonTriggers
+          };
+          
+          set({ monthlyData, selectedMonth: monthId });
+        } catch (error) {
+          console.error('Failed to load month data:', error);
+          // Reset to empty state on error
+          set({ 
+            monthlyData: {
+              days: [],
+              totalMinutes: 0,
+              topCategories: [],
+              commonTriggers: []
+            }
+          });
+        }
+      },
+
+      // Stats management
+      loadStatsData: async (timeRange) => {
+        try {
+          const now = new Date();
+          let startDate: string;
+          
+          // Calculate date range based on timeRange
+          switch (timeRange) {
+            case '7d':
+              startDate = format(new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
+              break;
+            case '30d':
+              startDate = format(new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
+              break;
+            case '90d':
+              startDate = format(new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
+              break;
+            case '1y':
+              startDate = format(new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
+              break;
+            default:
+              startDate = format(new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd');
+          }
+          
+          const endDate = format(now, 'yyyy-MM-dd');
+          
+          // Get data
+          const days = await repository.getDaysInRange(startDate, endDate);
+          const entries = await repository.listEntriesInRange(startDate, endDate);
+          
+          // Build time series
+          const timeSeries: TimeSeriesPoint[] = days.map(day => ({
+            date: day.id,
+            minutes: day.totalFastMinutes,
+            checklistCompletion: day.checklistCompletion
+          }));
+          
+          // Calculate totals
+          const totalMinutes = entries.reduce((sum, entry) => sum + entry.minutes, 0);
+          const totalDays = days.length;
+          const averageChecklist = totalDays > 0 
+            ? days.reduce((sum, day) => sum + day.checklistCompletion, 0) / totalDays 
+            : 0;
+          
+          // Category breakdown
+          const categoryMap = entries.reduce((acc, entry) => {
+            acc[entry.category] = (acc[entry.category] || 0) + entry.minutes;
+            return acc;
+          }, {} as Record<string, number>);
+          
+          const categoryBreakdown = Object.entries(categoryMap)
+            .map(([category, minutes]) => ({
+              category,
+              minutes,
+              percentage: totalMinutes > 0 ? (minutes / totalMinutes) * 100 : 0
+            }))
+            .sort((a, b) => b.minutes - a.minutes);
+          
+          // Top triggers
+          const allTriggers = entries.flatMap(entry => entry.triggers);
+          const triggerCounts = allTriggers.reduce((acc, trigger) => {
+            acc[trigger] = (acc[trigger] || 0) + 1;
+            return acc;
+          }, {} as Record<string, number>);
+          
+          const topTriggers = Object.entries(triggerCounts)
+            .map(([trigger, count]) => ({ trigger, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 20);
+          
+          // Replacement usage
+          const replacementCounts = entries
+            .filter(entry => entry.replacement)
+            .reduce((acc, entry) => {
+              acc[entry.replacement!] = (acc[entry.replacement!] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>);
+          
+          const replacementUsage = Object.entries(replacementCounts)
+            .map(([replacement, count]) => ({
+              replacement,
+              count,
+              trend: 'stable' as const
+            }))
+            .sort((a, b) => b.count - a.count);
+          
+          // Weekly pattern
+          const dayGroups = entries.reduce((acc, entry) => {
+            const date = new Date(entry.dayId);
+            const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
+            acc[dayOfWeek] = acc[dayOfWeek] || [];
+            acc[dayOfWeek].push(entry.minutes);
+            return acc;
+          }, {} as Record<string, number[]>);
+          
+          const weeklyPattern = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+            .map(dayOfWeek => ({
+              dayOfWeek,
+              averageMinutes: dayGroups[dayOfWeek] 
+                ? dayGroups[dayOfWeek].reduce((sum, min) => sum + min, 0) / dayGroups[dayOfWeek].length
+                : 0
+            }));
+          
+          const statsData: StatsData = {
+            timeSeries,
+            totalDays,
+            totalMinutes,
+            averageChecklist,
+            categoryBreakdown,
+            topTriggers,
+            replacementUsage,
+            weeklyPattern
+          };
+          
+          set({ statsData });
+        } catch (error) {
+          console.error('Failed to load stats data:', error);
+          // Reset to empty state on error
+          set({ 
+            statsData: {
+              timeSeries: [],
+              totalDays: 0,
+              totalMinutes: 0,
+              averageChecklist: 0,
+              categoryBreakdown: [],
+              topTriggers: [],
+              replacementUsage: [],
+              weeklyPattern: []
+            }
+          });
+        }
+      },
+
       // Notifications
       addNotification: (notification) => {
         const id = Date.now().toString();
@@ -366,6 +686,16 @@ const useAppStore = create<AppStore>()(
           used: currentWeek.totalMinutes,
           cap: currentWeek.capMinutes,
           percentage: currentWeek.capUsagePct,
+        };
+      },
+
+      // Computed property for fast dopamine settings
+      get fastDopamineSettings() {
+        const { settings } = get();
+        return settings?.fastDopamineSettings || {
+          categories: ['Social Media', 'Gaming', 'Video Streaming', 'Shopping'],
+          replacements: ['Reading', 'Exercise', 'Meditation', 'Journaling'],
+          dailyCaps: []
         };
       },
     }),
