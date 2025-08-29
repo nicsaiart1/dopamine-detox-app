@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardHeader, CardContent } from './ui/Card';
-import { ChecklistTemplate, DayLog } from '@/types';
-import useAppStore from '@/store';
+import type { ChecklistTemplate, DayLog } from '../types/index.ts';
+import useAppStore from '../store/index.ts';
 import { clsx } from 'clsx';
 
 interface DayChecklistProps {
@@ -99,7 +99,7 @@ export default function DayChecklist({ day, template, dayId }: DayChecklistProps
                     className={clsx(
                       'flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors',
                       'hover:bg-gray-50 dark:hover:bg-gray-800',
-                      checked && 'bg-accent/5'
+                      checked && 'bg-accent-50'
                     )}
                   >
                     <input
@@ -143,7 +143,7 @@ export default function DayChecklist({ day, template, dayId }: DayChecklistProps
             placeholder="How did today go? What did you learn?"
             className={clsx(
               'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm',
-              'placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-transparent',
+              'placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-accent-500 focus:border-transparent',
               'dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500',
               'min-h-[80px] resize-none'
             )}

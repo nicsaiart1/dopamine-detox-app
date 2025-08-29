@@ -1,11 +1,11 @@
-import Dexie, { Table } from 'dexie';
-import { UserSettings, DayLog, ActivityEntry, WeekSummary } from '@/types';
+import Dexie from 'dexie';
+import type { UserSettings, DayLog, ActivityEntry, WeekSummary } from '../types/index.ts';
 
 export class DB extends Dexie {
-  settings!: Table<UserSettings, string>;
-  days!: Table<DayLog, string>;
-  entries!: Table<ActivityEntry, string>;
-  weeks!: Table<WeekSummary, string>;
+  settings!: Dexie.Table<UserSettings, string>;
+  days!: Dexie.Table<DayLog, string>;
+  entries!: Dexie.Table<ActivityEntry, string>;
+  weeks!: Dexie.Table<WeekSummary, string>;
 
   constructor() {
     super('dopamine_detox');

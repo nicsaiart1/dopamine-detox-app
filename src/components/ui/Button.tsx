@@ -15,7 +15,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={clsx(
           // Base styles
           'inline-flex items-center justify-center rounded-md font-medium transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-2',
           'disabled:pointer-events-none disabled:opacity-50',
           
           // Size variants
@@ -27,7 +27,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           
           // Color variants
           {
-            'bg-accent text-white hover:bg-accent/90': variant === 'primary',
+            'bg-accent text-white hover:bg-accent-900': variant === 'primary',
             'bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700': variant === 'secondary',
             'border border-gray-300 bg-transparent hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800': variant === 'outline',
             'hover:bg-gray-100 dark:hover:bg-gray-800': variant === 'ghost',

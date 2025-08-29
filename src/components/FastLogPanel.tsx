@@ -3,8 +3,8 @@ import { Card, CardHeader, CardContent } from './ui/Card';
 import Button from './ui/Button';
 import Input from './ui/Input';
 import Badge from './ui/Badge';
-import { ActivityEntry, ActivityFormData } from '@/types';
-import useAppStore from '@/store';
+import type { ActivityEntry, ActivityFormData } from '../types/index.ts';
+import useAppStore from '../store/index.ts';
 import { clsx } from 'clsx';
 import { format } from 'date-fns';
 
@@ -183,7 +183,7 @@ export default function FastLogPanel({ dayId, entries }: FastLogPanelProps) {
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 dark:border-gray-600 dark:bg-gray-800"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500 dark:border-gray-600 dark:bg-gray-800"
                   required
                 >
                   <option value="">Select category</option>
@@ -236,7 +236,7 @@ export default function FastLogPanel({ dayId, entries }: FastLogPanelProps) {
                 <select
                   value={formData.replacement}
                   onChange={(e) => setFormData(prev => ({ ...prev, replacement: e.target.value }))}
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent/50 dark:border-gray-600 dark:bg-gray-800"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-accent-500 dark:border-gray-600 dark:bg-gray-800"
                 >
                   <option value="">None</option>
                   {settings.replacementCategories.map(replacement => (

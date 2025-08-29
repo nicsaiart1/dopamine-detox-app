@@ -1,12 +1,12 @@
-import { 
+import type { 
   UserSettings, 
   DayLog, 
   ActivityEntry, 
   WeekSummary, 
   UUID,
   ChecklistTemplate 
-} from '@/types';
-import { db } from './db';
+} from '../types/index.ts';
+import { db } from './db.ts';
 import { v4 as uuidv4 } from 'uuid';
 import { format, startOfWeek, endOfWeek, getISOWeek, getYear } from 'date-fns';
 

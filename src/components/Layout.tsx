@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { clsx } from 'clsx';
-import { ViewType } from '@/types';
-import useAppStore from '@/store';
+import type { ViewType } from '../types/index.ts';
+import useAppStore from '../store/index.ts';
 import Button from './ui/Button';
 import { Card } from './ui/Card';
 import { format } from 'date-fns';
@@ -28,6 +28,7 @@ export default function Layout({ children }: LayoutProps) {
     { view: 'week', label: 'Week', icon: '📊' },
     { view: 'month', label: 'Month', icon: '🗓️' },
     { view: 'stats', label: 'Stats', icon: '📈' },
+    { view: 'settings', label: 'Settings', icon: '⚙️' },
   ];
 
   const handleDateChange = (direction: 'prev' | 'next') => {
@@ -64,7 +65,7 @@ export default function Layout({ children }: LayoutProps) {
                 className={clsx(
                   'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
                   currentView === item.view
-                    ? 'bg-accent/10 text-accent'
+                    ? 'bg-accent-100 text-accent'
                     : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100'
                 )}
               >
@@ -138,7 +139,7 @@ export default function Layout({ children }: LayoutProps) {
               key={notification.id}
               variant="elevated"
               className={clsx(
-                'w-80 animate-in p-4 transition-all duration-300',
+                'w-80 animate-slide-in p-4 transition-all duration-300',
                 {
                   'border-l-4 border-green-500': notification.type === 'success',
                   'border-l-4 border-red-500': notification.type === 'error',

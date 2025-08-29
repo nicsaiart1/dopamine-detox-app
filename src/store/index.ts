@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { 
+import type { 
   UserSettings, 
   DayLog, 
   ActivityEntry, 
@@ -10,8 +10,8 @@ import {
   TimeSeriesPoint,
   CategoryBreakdown,
   Notification
-} from '@/types';
-import { repository } from '@/data/repository';
+} from '../types/index.ts';
+import { repository } from '../data/repository.ts';
 import { format } from 'date-fns';
 
 interface AppStore extends AppState {

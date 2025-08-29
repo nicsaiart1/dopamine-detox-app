@@ -58,7 +58,7 @@ export interface WeekSummary {
 }
 
 // View types
-export type ViewType = 'day' | 'week' | 'month' | 'stats';
+export type ViewType = 'day' | 'week' | 'month' | 'stats' | 'settings';
 
 // Chart data types
 export interface TimeSeriesPoint {

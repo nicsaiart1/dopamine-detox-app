@@ -1,6 +1,6 @@
-import { ExportData, WeekSummary } from '@/types';
-import { repository } from '@/data/repository';
-import { getWeekRange, formatDate, getWeekLabel } from './dates';
+import type { ExportData, WeekSummary } from '../types/index.ts';
+import { repository } from '../data/repository.ts';
+import { getWeekRange, formatDate, getWeekLabel } from './dates.ts';
 import { format } from 'date-fns';
 
 export const SCHEMA_VERSION = 1;

@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
-import useAppStore from '@/store';
-import Layout from '@/components/Layout';
-import DayPage from '@/pages/DayPage';
-import WeekPage from '@/pages/WeekPage';
-import MonthPage from '@/pages/MonthPage';
-import StatsPage from '@/pages/StatsPage';
+import useAppStore from './store/index.ts';
+import Layout from './components/Layout.tsx';
+import DayPage from './pages/DayPage.tsx';
+import WeekPage from './pages/WeekPage.tsx';
+import MonthPage from './pages/MonthPage.tsx';
+import StatsPage from './pages/StatsPage.tsx';
+import SettingsPage from './pages/SettingsPage.tsx';
 
 function App() {
   const { currentView, isInitialized, init } = useAppStore();
@@ -25,6 +26,8 @@ function App() {
         return <MonthPage />;
       case 'stats':
         return <StatsPage />;
+      case 'settings':
+        return <SettingsPage />;
       default:
         return <DayPage />;
     }

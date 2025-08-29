@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import useAppStore from '@/store';
-import DayChecklist from '@/components/DayChecklist';
-import FastLogPanel from '@/components/FastLogPanel';
-import { Card, CardContent } from '@/components/ui/Card';
-import { getRelativeDateLabel } from '@/utils/dates';
+import useAppStore from '../store/index.ts';
+import DayChecklist from '../components/DayChecklist.tsx';
+import FastLogPanel from '../components/FastLogPanel.tsx';
+import { Card, CardContent } from '../components/ui/Card.tsx';
+import { getRelativeDateLabel } from '../utils/dates.ts';
 
 export default function DayPage() {
   const {
